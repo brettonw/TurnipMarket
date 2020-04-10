@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta id="myViewport" name="viewport" content="width=device-width,user-scalable=yes">
     <title>Turnip Price Simulator</title>
     <link rel="stylesheet" href="https://bedrock.brettonw.com/dist/latest/bedrock.css"/>
     <link rel="stylesheet" href="index.css"/>
@@ -102,8 +103,11 @@
         legend.push("Overall Average");
 
         // set the average plot
+        let divElement = document.getElementById("averagePriceDiv");
         let svg = PlotSvg.multipleLine("Average Turnip Price for " + numberWithCommas (samples) + " Weeks", "Time", "Turnip Price in Bells", plotDataArray, legend);
-        document.getElementById("averagePriceDiv").innerHTML = svg;
+        //divElement.style.width = "200px";
+        divElement.style.height = (divElement.offsetWidth / 2) + "px";
+        divElement.innerHTML = svg;
     };
 
     main ();
