@@ -1,0 +1,13 @@
+body {
+    max-width: 1400px;
+}
+
+.plotShell {
+    height: 720px;
+    border: solid;
+    border-width: 1px;
+    border-radius: 2px;
+    border-color: #bbb;
+    margin-bottom: 5px;
+}
+

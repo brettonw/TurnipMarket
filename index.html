@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Turnip Price Simulator</title>
+    <link rel="stylesheet" href="https://bedrock.brettonw.com/dist/latest/bedrock.css"/>
+    <link rel="stylesheet" href="index.css"/>
+    <link rel="stylesheet" href="plot-svg.css" />
+    <link rel="icon" type="image/png" href="turnip.png"/>
+</head>
+
+<body>
+<div id="averagePriceDiv" class="plotShell"></div>
+
+</body>
+</html>
+
+<script src="plot-svg.js"></script>
+<script src="TurnipPrices.js"></script>
+<script>
+    function numberWithCommas(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    let main = function () {
+
+        let plotDataArray = [];
+        let pricesSrc = [];
+        let legend = [];
+
+        const samples = 1000000;
+        const numPatterns = 4;
+
+        // generate an average plot for each of the patterns over the number of samples
+        for (let pattern = 0; pattern < numPatterns; ++pattern) {
+            let prices = turnipPrices(pattern);
+            for (let i = 0; i < samples; ++i) {
+                let addPrices = turnipPrices(pattern);
+                for (let j = 0; j < addPrices.length; ++j) {
+                    prices[j] += addPrices[j];
+                }
+            }
+
+            // compute the averages
+            for (let i = 0; i < prices.length; ++i) {
+                prices[i] /= samples;
+            }
+
+            // save the source for a future computation
+            pricesSrc[pattern] = prices;
+
+            // create the plot data for the averaged pattern
+            let plotData = [];
+            for (let i = 0; i < prices.length; ++i) {
+                plotData.push({x: i, y: prices[i]});
+            }
+            plotDataArray.push(plotData);
+        }
+
+        // start with pattern 3, compute the average distribution of the patterns over the number of samples
+        let pattern = 3;
+        let distribution = [0, 0, 0, 0];
+        for (let i = 0; i < samples; ++i) {
+            distribution[pattern]++;
+            pattern = nextPattern(pattern);
+        }
+        for (let i = 0; i < numPatterns; ++i) {
+            distribution[i] = Math.round (distribution[i] / samples * 100000) / 1000;
+            legend.push("Pattern " + i + " (" + distribution[i] + "%)");
+        }
+
+        // multiply the sampled averages by the sampled distribution to get a total average expect return
+        let finalAverage = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        for (let i = 0; i < numPatterns; ++i) {
+            for (let j = 0; j < pricesSrc[i].length; ++j) {
+                finalAverage[j] += distribution[i] * pricesSrc[i][j];
+            }
+        }
+        // compute the averages
+        for (let i = 0; i < finalAverage.length; ++i) {
+            finalAverage[i] /= 100;
+        }
+        // create the plot data for the averaged pattern
+        let plotData = [];
+        for (let i = 0; i < finalAverage.length; ++i) {
+            plotData.push({x: i, y: finalAverage[i]});
+        }
+        plotDataArray.push(plotData);
+
+        legend.push("Overall Average");
+
+        // set the average plot
+        let svg = PlotSvg.multipleLine("Average Turnip Price for " + numberWithCommas (samples) + " Weeks", "Time", "Turnip Price in Bells", plotDataArray, legend);
+        document.getElementById("averagePriceDiv").innerHTML = svg;
+    };
+
+    main ();
+
+    // save the result as a CSV file
+    /*
+    let a = document.body.appendChild (document.createElement ("a"));
+    a.download = "export.csv";
+    a.setAttribute ("href", "data:text/plain;charset=utf-8," + encodeURIComponent (bedrockDatabaseDisplayList.innerText));
+    a.click ();
+    document.body.removeChild(a);
+    */
+
+</script>
