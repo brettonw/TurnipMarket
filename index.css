@@ -16,3 +16,7 @@ body {
     margin-bottom: 16px;
     width: 800px;
 }
+
+div#footer {
+    margin-top:         5px;
+}
